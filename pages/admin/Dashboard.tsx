@@ -1,49 +1,170 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Home,
   Users,
+  ShoppingBag,
   Settings,
   LogOut,
-} from 'lucide-react'; // Icons from lucide-react
+  BarChart2,
+  AlignVerticalJustifyStartIcon,
+} from 'lucide-react';
+import { Layout, Menu, Button, Card, Row, Col, Typography, Statistic } from 'antd';
+import './Dashboard.css';
+import Sellers from '../../components/Admin/Sellers'
+
+const { Header, Sider, Content } = Layout;
+const { Title } = Typography;
 
 const Dashboard = () => {
+  const [selectedKey, setSelectedKey] = useState('dashboard');
   const navigate = useNavigate();
 
-  const navItems = [
-    { label: 'Dashboard', icon: <Home size={20} />, route: '/admin/dashboard' },
-    { label: 'Users', icon: <Users size={20} />, route: '/admin/users' },
-    { label: 'Settings', icon: <Settings size={20} />, route: '/admin/settings' },
-    { label: 'Logout', icon: <LogOut size={20} />, route: '/logout' },
-  ];
-
-  const handleNavigation = (route: string) => {
-    navigate(route);
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/auth/login');
   };
 
-  return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      {/* Main content */}
-      <div className="flex-1 p-4 overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-4">Welcome to Admin Dashboard</h1>
-        <p>This is where you manage admin tasks.</p>
-        {/* You can add cards, tables, analytics here */}
-      </div>
+  const handleMenuClick = ({ key }: { key: string }) => {
+    setSelectedKey(key);
+  };
 
-      {/* Footer Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-md flex justify-around items-center py-3">
-        {navItems.map((item) => (
-          <button
-            key={item.label}
-            onClick={() => handleNavigation(item.route)}
-            className="flex flex-col items-center text-sm text-gray-600 hover:text-blue-600"
-          >
-            {item.icon}
-            <span className="mt-1">{item.label}</span>
-          </button>
-        ))}
-      </div>
+  const renderContent = () => {
+    switch (selectedKey) {
+      case 'sellers':
+        return <Sellers />;
+      default:
+        return (
+          <>
+            <Row gutter={[24, 24]}>
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Statistic
+                  title="Total Sellers"
+                  value={42}
+                  valueStyle={{ color: '#00557F' }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Statistic
+                  title="Active Products"
+                  value={156}
+                  valueStyle={{ color: '#008A3C' }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Statistic
+                  title="Total Customers"
+                  value={890}
+                  valueStyle={{ color: '#1CA3EC' }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Statistic
+                  title="Total Orders"
+                  value={267}
+                  valueStyle={{ color: '#5DF249' }}
+                />
+              </Card>
+            </Col>
+          </Row>
+
+          <Row gutter={[24, 24]} className="mt-6">
+            <Col xs={24} lg={16}>
+              <Card title="Recent Activity">
+                <p>Activity list will go here...</p>
+              </Card>
+            </Col>
+            <Col xs={24} lg={8}>
+              <Card title="Quick Actions">
+                <div className="quick-actions">
+                  <Button type="primary" block className="mb-3">
+                    Approve New Sellers
+                  </Button>
+                  <Button type="primary" block className="mb-3">
+                    Review Products
+                  </Button>
+                  <Button type="primary" block>
+                    Generate Reports
+                  </Button>
+                </div>
+              </Card>
+            </Col>
+          </Row>
+          </>
+        );
+    }
+  };
+  const menuItems = [
+    { key: 'dashboard', label: 'Dashboard', icon: <Home size={20} /> },
+    { key: 'sellers', label: 'Sellers', icon: <Users size={20} /> },
+    { key: 'products', label: 'Products', icon: <ShoppingBag size={20} /> },
+    { key: 'analytics', label: 'Analytics', icon: <BarChart2 size={20} /> },
+    { key: 'settings', label: 'Settings', icon: <Settings size={20} /> },
+  ];
+
+  return (
+    <Layout className="dashboard-layout">
+      <Sider className="dashboard-sider">
+        <div className="logo-container">
+          <Title level={4} style={{ color: 'white', margin: 0 }}>TradeNest</Title>
+        </div>
+        <Menu
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={['dashboard']}
+          selectedKeys={[selectedKey]}
+          className="dashboard-menu"
+          items={menuItems}
+          onClick={handleMenuClick}
+        />
+        <Button
+          type="text"
+          icon={<LogOut size={20} />}
+          onClick={handleLogout}
+          className="logout-button"
+        >
+          Logout
+        </Button>
+      </Sider>
+
+      <Layout>
+        <Header className="dashboard-header">
+          <div className="header-content">
+            <div className="header-left">
+              <div className="header-title">
+                <Title level={4}>TradeNest Admin</Title>
+              </div>
+            </div>
+    
+    <div className="header-right">
+      <Button 
+        type="primary"
+        icon={<LogOut size={16} />}
+        onClick={handleLogout}
+        className="header-logout-btn"
+      >
+        Logout
+      </Button>
     </div>
+  </div>
+</Header>
+        
+
+
+<Content className="dashboard-content">
+          {renderContent()}
+        </Content>
+
+        
+      </Layout>
+    </Layout>
   );
 };
 
