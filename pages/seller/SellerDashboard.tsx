@@ -11,6 +11,7 @@ import {
   LogOut
 } from 'lucide-react';
 import './SellerDashboard.css';
+import SellerOrders from '../../pages/seller/SellerOrders';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -30,6 +31,74 @@ const SellerDashboard = () => {
       navigate('/seller/products');
     } else if (key === 'settings') {
       navigate('/seller/settings');
+    }
+  };
+
+  const renderContent = () => {
+    switch (selectedKey) {
+      case 'orders':
+        return <SellerOrders />;
+      default:
+        return (
+          <>
+            <Row gutter={[24, 24]}>
+              <Col xs={24} sm={12} lg={8}>
+                <Card>
+                  <Statistic
+                    title="Total Products"
+                    value={12}
+                    valueStyle={{ color: '#1890ff' }}
+                    prefix={<Package size={20} />}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={12} lg={8}>
+                <Card>
+                  <Statistic
+                    title="Pending Orders"
+                    value={5}
+                    valueStyle={{ color: '#fa8c16' }}
+                    prefix={<ShoppingBag size={20} />}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={12} lg={8}>
+                <Card>
+                  <Statistic
+                    title="Total Revenue"
+                    value={2450}
+                    valueStyle={{ color: '#52c41a' }}
+                    prefix={<DollarSign size={20} />}
+                    suffix="₹"
+                  />
+                </Card>
+              </Col>
+            </Row>
+
+            <Row gutter={[24, 24]} className="mt-6">
+              <Col xs={24} lg={16}>
+                <Card title="Recent Orders" className="recent-orders-card">
+                  <p>Your recent orders will appear here...</p>
+                </Card>
+              </Col>
+              <Col xs={24} lg={8}>
+                <Card title="Quick Actions" className="quick-actions-card">
+                  <div className="quick-actions">
+                    <Button type="primary" block className="mb-3">
+                      Add New Product
+                    </Button>
+                    <Button type="default" block className="mb-3">
+                      View Pending Orders
+                    </Button>
+                    <Button type="default" block>
+                      Update Shop Profile
+                    </Button>
+                  </div>
+                </Card>
+              </Col>
+            </Row>
+          </>
+        );
     }
   };
 
@@ -88,62 +157,7 @@ const SellerDashboard = () => {
         </Header>
 
         <Content className="seller-dashboard-content">
-          <Row gutter={[24, 24]}>
-            <Col xs={24} sm={12} lg={8}>
-              <Card>
-                <Statistic
-                  title="Total Products"
-                  value={12}
-                  valueStyle={{ color: '#1890ff' }}
-                  prefix={<Package size={20} />}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} lg={8}>
-              <Card>
-                <Statistic
-                  title="Pending Orders"
-                  value={5}
-                  valueStyle={{ color: '#fa8c16' }}
-                  prefix={<ShoppingBag size={20} />}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} lg={8}>
-              <Card>
-                <Statistic
-                  title="Total Revenue"
-                  value={2450}
-                  valueStyle={{ color: '#52c41a' }}
-                  prefix={<DollarSign size={20} />}
-                  suffix="₹"
-                />
-              </Card>
-            </Col>
-          </Row>
-
-          <Row gutter={[24, 24]} className="mt-6">
-            <Col xs={24} lg={16}>
-              <Card title="Recent Orders" className="recent-orders-card">
-                <p>Your recent orders will appear here...</p>
-              </Card>
-            </Col>
-            <Col xs={24} lg={8}>
-              <Card title="Quick Actions" className="quick-actions-card">
-                <div className="quick-actions">
-                  <Button type="primary" block className="mb-3">
-                    Add New Product
-                  </Button>
-                  <Button type="default" block className="mb-3">
-                    View Pending Orders
-                  </Button>
-                  <Button type="default" block>
-                    Update Shop Profile
-                  </Button>
-                </div>
-              </Card>
-            </Col>
-          </Row>
+          {renderContent()}
         </Content>
       </Layout>
     </Layout>
