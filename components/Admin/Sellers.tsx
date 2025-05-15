@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Button, Tag, message } from 'antd';
+import { Table, Card, Button, Tag, message, Switch } from 'antd';
 import axios from 'axios';
 
 interface Seller {
@@ -8,6 +8,7 @@ interface Seller {
   shopName: string;
   city: string;
   status: number;
+  isActive: boolean;
 }
 
 const Sellers = () => {
@@ -30,6 +31,18 @@ const Sellers = () => {
       dataIndex: 'city',
       key: 'city',
     },
+    {
+      title: 'Active Status',
+      key: 'activeStatus',
+      render: (_, record: Seller) => (
+        <Switch
+          checked={record.isActive}
+          onChange={(checked) => handleToggleStatus(record.userId, checked)}
+          disabled={record.status === 0}
+        />
+      ),
+    },
+
     {
       title: 'Status',
       dataIndex: 'status',
@@ -82,6 +95,24 @@ const Sellers = () => {
     },
   ];
   
+  const handleToggleStatus = async (userId: string, status: boolean) => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/admin/toggle-seller-status?userId=${userId}&isActive=${status}`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      message.success(`Seller status ${status ? 'activated' : 'deactivated'} successfully`);
+      fetchSellers();
+    } catch (error) {
+      message.error('Failed to update seller status');
+    }
+  };
+
   const handleVerification = async (id: string, action: 'approve' | 'reject') => {
     try {
       await axios.put(
