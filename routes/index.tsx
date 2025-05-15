@@ -17,6 +17,7 @@ import AdminDashboard from '../pages/admin/Dashboard';
 // import Cart from '../pages/customer/Cart';
 
 import NotFound from '../pages/NotFound';
+import SellerDashboard from '../pages/seller/SellerDashboard';
 
 // Dummy auth & role check - Replace with actual auth logic
 const getUserRole = (): 'admin' | 'seller' | 'customer' | null => {
@@ -76,8 +77,8 @@ const getUserRole = (): 'admin' | 'seller' | 'customer' | null => {
 
       {/* Seller Routes */}
       <Route element={<PrivateRoute allowedRoles={['seller']} />}>
-        {/* <Route path="/seller/dashboard" element={<SellerDashboard />} />
-        <Route path="/seller/products" element={<SellerProducts />} /> */}
+         <Route path="/seller/dashboard" element={<SellerDashboard />} />
+        {/* <Route path="/seller/products" element={<SellerProducts />} />  */}
       </Route>
 
       {/* Customer Routes */}

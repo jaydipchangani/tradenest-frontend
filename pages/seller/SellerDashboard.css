@@ -1,0 +1,70 @@
+.seller-dashboard-layout {
+  min-height: 100vh;
+}
+
+.seller-dashboard-sider {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.logo-container {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.seller-dashboard-menu {
+  border-right: 0;
+}
+
+.logout-button {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: left;
+  padding-left: 24px;
+}
+
+.seller-dashboard-header {
+  background: white;
+  padding: 0 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+.header-title {
+  color: #1890ff;
+}
+
+.seller-dashboard-content {
+  margin: 24px;
+  padding: 24px;
+  background: #f0f2f5;
+  border-radius: 8px;
+}
+
+.mt-6 {
+  margin-top: 24px;
+}
+
+.mb-3 {
+  margin-bottom: 12px;
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-orders-card, .quick-actions-card {
+  height: 100%;
+}
