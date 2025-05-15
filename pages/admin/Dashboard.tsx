@@ -8,10 +8,13 @@ import {
   LogOut,
   BarChart2,
   AlignVerticalJustifyStartIcon,
+  Package,
 } from 'lucide-react';
 import { Layout, Menu, Button, Card, Row, Col, Typography, Statistic } from 'antd';
 import './Dashboard.css';
 import Sellers from '../../components/Admin/Sellers'
+import Products from '../../components/Admin/Products';
+import Orders from '../../components/Admin/Orders';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -33,6 +36,10 @@ const Dashboard = () => {
     switch (selectedKey) {
       case 'sellers':
         return <Sellers />;
+      case 'products':
+        return <Products />;
+        case 'orders':
+      return <Orders />;
       default:
         return (
           <>
@@ -105,8 +112,7 @@ const Dashboard = () => {
     { key: 'dashboard', label: 'Dashboard', icon: <Home size={20} /> },
     { key: 'sellers', label: 'Sellers', icon: <Users size={20} /> },
     { key: 'products', label: 'Products', icon: <ShoppingBag size={20} /> },
-    { key: 'analytics', label: 'Analytics', icon: <BarChart2 size={20} /> },
-    { key: 'settings', label: 'Settings', icon: <Settings size={20} /> },
+    { key: 'orders', label: 'Orders', icon: <Package size={20} /> }
   ];
 
   return (
