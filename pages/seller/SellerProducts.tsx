@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Tag, message, Button, Switch } from 'antd';
 import axios from 'axios';
+import ProductDrawer from './ProductDrawer';
 
 interface Product {
   id: string;
@@ -17,6 +18,7 @@ interface Product {
 const SellerProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   const BASE_IMAGE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -31,6 +33,27 @@ const SellerProducts = () => {
       7: 'Toys & Games'
     };
     return categories[categoryId] || 'Unknown Category';
+  };
+
+  const handleInventoryChange = async (productId: string, increase: boolean, quantity: number = 1) => {
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/api/Product/${increase ? 'increase' : 'decrease'}-inventory/${productId}`,
+        {
+            "quantity": 1
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'quantity': quantity
+          },
+        }
+      );
+      message.success(`Inventory ${increase ? 'increased' : 'decreased'} successfully`);
+      fetchProducts();
+    } catch (error) {
+      message.error(`Failed to ${increase ? 'increase' : 'decrease'} inventory`);
+    }
   };
 
   const columns = [
@@ -66,9 +89,24 @@ const SellerProducts = () => {
       dataIndex: 'inventory',
       key: 'inventory',
       render: (inventory: number, record: Product) => (
-        <span style={{ color: inventory <= record.stockThreshold ? 'red' : 'inherit' }}>
-          {inventory} {inventory <= record.stockThreshold && <Tag color="red">Low Stock</Tag>}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Button 
+            size="small"
+            onClick={() => handleInventoryChange(record.id, false)}
+            disabled={inventory <= 0}
+          >
+            -
+          </Button>
+          <span style={{ color: inventory <= record.stockThreshold ? 'red' : 'inherit' }}>
+            {inventory} {inventory <= record.stockThreshold && <Tag color="red">Low Stock</Tag>}
+          </span>
+          <Button 
+            size="small"
+            onClick={() => handleInventoryChange(record.id, true)}
+          >
+            +
+          </Button>
+        </div>
       ),
     },
     {
@@ -180,7 +218,7 @@ const SellerProducts = () => {
       title="My Products" 
       className="seller-products-card"
       extra={
-        <Button type="primary" onClick={() => message.info('Add new product')}>
+        <Button type="primary" onClick={() => setIsDrawerOpen(true)}>
           Add New Product
         </Button>
       }
@@ -191,6 +229,12 @@ const SellerProducts = () => {
         loading={loading}
         rowKey="id"
         pagination={{ pageSize: 10 }}
+      />
+
+      <ProductDrawer
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSuccess={fetchProducts}
       />
     </Card>
   );
