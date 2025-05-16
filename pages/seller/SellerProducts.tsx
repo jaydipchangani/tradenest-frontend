@@ -19,6 +19,7 @@ const SellerProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
   const BASE_IMAGE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -35,6 +36,7 @@ const SellerProducts = () => {
     return categories[categoryId] || 'Unknown Category';
   };
 
+  
   const handleInventoryChange = async (productId: string, increase: boolean, quantity: number = 1) => {
     try {
       await axios.put(
@@ -57,6 +59,12 @@ const SellerProducts = () => {
   };
 
   const columns = [
+    {   
+        title: 'S.No',
+        dataIndex: 'id',
+        key: 'id'
+
+    },
     {
       title: 'Image',
       key: 'image',
@@ -134,7 +142,7 @@ const SellerProducts = () => {
         <div style={{ display: 'flex', gap: '8px' }}>
           <Button 
             type="primary" 
-            onClick={() => handleEditProduct(record.id)}
+            onClick={() => handleEditProduct(record)}
           >
             Edit
           </Button>
@@ -187,9 +195,9 @@ const SellerProducts = () => {
     }
   };
 
-  const handleEditProduct = (productId: string) => {
-    // Navigate to edit product page or open modal
-    message.info(`Edit product with ID: ${productId}`);
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product);
+    setIsDrawerOpen(true);
   };
 
   const handleDeleteProduct = async (productId: string) => {
@@ -231,11 +239,15 @@ const SellerProducts = () => {
         pagination={{ pageSize: 10 }}
       />
 
-      <ProductDrawer
-        open={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSuccess={fetchProducts}
-      />
+<ProductDrawer
+  open={isDrawerOpen}
+  onClose={() => {
+    setIsDrawerOpen(false);
+    setEditingProduct(null);
+  }}
+  onSuccess={fetchProducts}
+  editProduct={editingProduct}
+/>
     </Card>
   );
 };
