@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Card, Row, Col, Typography, Input, Select, Button, Tag, Pagination, message } from 'antd';
+import { Layout, Card, Row, Col, Typography, Input, Select, Button, Tag, Pagination, message, Descriptions } from 'antd';
 import { ShoppingCartOutlined, HeartOutlined, FilterOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useDebounce } from 'use-debounce';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
@@ -42,6 +43,10 @@ const Products: React.FC = () => {
   const [isDescending, setIsDescending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const BASE_IMAGE_URL = import.meta.env.VITE_API_BASE_URL || '';
+  const [quantities, setQuantities] = useState<{ [productId: string]: number }>({});
+
+
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
 
   const fetchProducts = async () => {
     try {
@@ -53,7 +58,7 @@ const Products: React.FC = () => {
             pageSize: pageSize,
             sortBy: sortBy,
             isDescending: isDescending,
-            searchQuery: searchQuery || undefined
+            searchQuery: debouncedSearchQuery || undefined
           },
           headers: {
             'Accept': 'application/json'
@@ -80,13 +85,54 @@ const Products: React.FC = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [currentPage, pageSize, sortBy, isDescending, searchQuery]);
+  }, [currentPage, pageSize, sortBy, isDescending, debouncedSearchQuery]);
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
   };
 
+  const handleQuantityChange = (productId: string, value: number) => {
+    setQuantities(prev => ({
+      ...prev,
+      [productId]: value
+    }));
+  };
+
+  const handleAddToCart = async (productId: string, productName:string,productPrice: number) => {
+    const quantity = quantities[productId] || 1;
+  
+    try {
+        const token = localStorage.getItem('token');
+      
+        await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/Order/add-to-cart`,
+          {
+           "productId":  productId,
+            "quantity": quantity,
+            "productName" :productName,
+            "productPrice": productPrice
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+          }
+        );
+      
+        message.success('Added to cart successfully');
+      } catch (error) {
+        console.error(error);
+        message.error('Failed to add to cart');
+      }
+      
+  };
+
+
+  
+  
   const handleSortChange = (value: string) => {
     setCurrentPage(1);
     switch (value) {
@@ -122,13 +168,13 @@ const Products: React.FC = () => {
             <Text type="secondary">Browse our collection of quality products</Text>
           </Col>
           <Col>
-            <Search
-              placeholder="Search products..."
-              style={{ width: 300 }}
-              size="large"
-              onSearch={handleSearch}
-              allowClear
-            />
+          <Search
+  placeholder="Search products..."
+  style={{ width: 300 }}
+  size="large"
+  onChange={(e) => handleSearch(e.target.value)}
+  allowClear
+/>
           </Col>
         </Row>
       </div>
@@ -156,7 +202,7 @@ const Products: React.FC = () => {
           </Card>
 
           <Row gutter={[16, 16]}>
-            {products.map(product => (
+          {products.filter(product => product.isActive).map(product => (
               <Col xs={24} sm={12} lg={8} key={product.id}>
                 <Card
                   hoverable
@@ -172,19 +218,47 @@ const Products: React.FC = () => {
 />
                   }
                   actions={[
-                    <Button type="text" icon={<HeartOutlined />} />,
-                    <Button 
-                      type="primary" 
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                      <Button
+                        onClick={() => handleQuantityChange(product.id, Math.max(1, (quantities[product.id] || 1) - 1))}
+                        size="small"
+                      >−</Button>
+                  
+                      <Input
+                        type="number"
+                        min={1}
+                        max={product.inventory}
+                        value={quantities[product.id] || 1}
+                        onChange={(e) =>
+                          handleQuantityChange(product.id, Math.min(product.inventory, Math.max(1, parseInt(e.target.value) || 1)))
+                        }
+                        style={{ width: 60, textAlign: 'center' }}
+                        size="small"
+                      />
+                  
+                      <Button
+                        onClick={() =>
+                          handleQuantityChange(
+                            product.id,
+                            Math.min(product.inventory, (quantities[product.id] || 1) + 1)
+                          )
+                        }
+                        size="small"
+                      >+</Button>
+                    </div>,
+                  
+                    <Button
+                      type="primary"
                       icon={<ShoppingCartOutlined />}
                       disabled={!product.isActive || product.inventory <= 0}
-                      style={{ 
-                        backgroundColor: '#4096ff',
-                        borderColor: '#4096ff'
-                      }}
+                      style={{ backgroundColor: '#4096ff', borderColor: '#4096ff' }}
+                      onClick={() => handleAddToCart(product.id,product.name,product.price)}
                     >
                       Add to Cart
                     </Button>
                   ]}
+                  
+                  
                 >
                   <Card.Meta
                     title={

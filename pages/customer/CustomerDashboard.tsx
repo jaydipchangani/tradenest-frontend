@@ -13,6 +13,7 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Products from './Products';
+import Cart from './Cart';
 
 const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
@@ -23,7 +24,7 @@ const CustomerDashboard: React.FC = () => {
     const navigate = useNavigate();
     const [cartCount] = useState(0);
 
-    const handleNavClick = (e: any) => {
+    const handleNavClick = (e: any) => {setCurrentView
         switch (e.key) {
             case 'home':
                 setCurrentView('home');
@@ -32,13 +33,13 @@ const CustomerDashboard: React.FC = () => {
                 setCurrentView('products');
                 break;
             case 'cart':
-                navigate('cart');
+                setCurrentView('cart');
                 break;
             case 'orders':
-                navigate('orders');
+                setCurrentView('orders');
                 break;
             case 'profile':
-                navigate('profile');
+                setCurrentView('profile');
                 break;
             default:
                 break;
@@ -56,6 +57,8 @@ const CustomerDashboard: React.FC = () => {
         switch (currentView) {
             case 'products':
                 return <Products />;
+            case 'cart':
+                return <Cart/>;
             default:
                 return (
                     <>
@@ -114,7 +117,7 @@ const CustomerDashboard: React.FC = () => {
             </Card>
           </Col>
         </Row>
-        
+
                         <div style={{ marginTop: 24 }}>
                     <Title level={4}>Recently Viewed Products</Title>
                     <Card style={{ borderRadius: 8 }}>
