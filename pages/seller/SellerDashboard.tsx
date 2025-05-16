@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import './SellerDashboard.css';
 import SellerOrders from '../../pages/seller/SellerOrders';
+import SellerProducts from './SellerProducts';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -27,9 +28,8 @@ const SellerDashboard = () => {
 
   const handleMenuClick = ({ key }: { key: string }) => {
     setSelectedKey(key);
-    if (key === 'products') {
-      navigate('/seller/products');
-    } else if (key === 'settings') {
+   
+    if (key === 'settings') {
       navigate('/seller/settings');
     }
   };
@@ -38,6 +38,8 @@ const SellerDashboard = () => {
     switch (selectedKey) {
       case 'orders':
         return <SellerOrders />;
+        case 'products':
+          return <SellerProducts />;
       default:
         return (
           <>
