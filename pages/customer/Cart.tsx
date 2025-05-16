@@ -45,6 +45,7 @@ const Cart: React.FC = () => {
     response.data.$values.forEach((item: any) => {
       itemMap[item.$id] = item;
     });
+    
       setCartItems(items);
     } catch (error) {
       console.error('Error fetching cart items:', error);
