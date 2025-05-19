@@ -236,22 +236,23 @@ const Products: React.FC = () => {
   </Row>
 </Card>
 
-          <Row gutter={[16, 16]}>
-          {products.filter(product => product.isActive).map(product => (
-              <Col xs={24} sm={12} lg={8} key={product.id}>
+<Row gutter={[24, 24]}>
+            {products.filter(product => product.isActive).map(product => (
+              <Col xs={24} sm={24} md={12} key={product.id}>
                 <Card
                   hoverable
                   loading={loading}
                   cover={
                     <img
-  alt={product.name}
-  src={`${BASE_IMAGE_URL}${product.imageUrl}`}
-  style={{ height: 200, objectFit: 'cover' }}
-  onError={(e) => {
-    e.currentTarget.src = '/placeholder-image.png';
-  }}
-/>
+                      alt={product.name}
+                      src={`${BASE_IMAGE_URL}${product.imageUrl}`}
+                      style={{ height: 300, objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder-image.png';
+                      }}
+                    />
                   }
+                  
                   actions={[
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                       <Button
