@@ -89,9 +89,17 @@ const Cart: React.FC = () => {
     }
   };
 
-  const handleRemoveItem = async (itemId: string) => {
+  const handleRemoveItem = async (productId: string) => {
     try {
-      await axios.delete(`/api/Cart/${itemId}`);
+      const token = localStorage.getItem('token');
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/api/Order/remove-from-cart/${productId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
       fetchCartItems();
       message.success('Item removed from cart');
     } catch (error) {
@@ -167,7 +175,7 @@ const Cart: React.FC = () => {
                       type="text"
                       danger
                       icon={<DeleteOutlined />}
-                      onClick={() => handleRemoveItem(item.id)}
+                      onClick={() => handleRemoveItem(item.productId)}
                     />
                   ]}
                 >
@@ -175,11 +183,7 @@ const Cart: React.FC = () => {
                     <div style={{ flex: 1 }}>
                       <List.Item.Meta
                         title={item.productName}
-                        description={
-                          <div>
-                            <Text type="secondary">Product ID: {item.productId}</Text>
-                          </div>
-                        }
+                        
                       />
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
                         <Button
