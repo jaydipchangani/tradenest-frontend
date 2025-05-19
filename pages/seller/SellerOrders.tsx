@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Tag, message, Button } from 'antd';
+import { DownloadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 interface OrderItem {
@@ -70,22 +71,13 @@ const SellerOrders = () => {
       },
     },
     {
-        title: 'Actions',
-        key: 'actions',
-        render: (_, record: OrderItem) => {
-          if (record.status !== 0) {
-            return (
-              <Button 
-                type="text" 
-                disabled
-                style={{ color: 'black', backgroundColor: '#f0f0f0' }}
-              >
-                Action Completed
-              </Button>
-            );
-          } else if (record.status === 0) {
-            return (
-              <div style={{ display: 'flex', gap: '8px' }}>
+      title: 'Actions',
+      key: 'actions',
+      render: (_: any, record: OrderItem) => {
+        return (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {record.status === 0 ? (
+              <>
                 <Button 
                   type="primary" 
                   onClick={() => handleProcessOrder(record.orderId, record.productId, true)}
@@ -100,12 +92,30 @@ const SellerOrders = () => {
                 >
                   Reject
                 </Button>
-              </div>
-            );
-          }
-          return null;
-        },
+              </>
+            ) : (
+              <>
+                <Button 
+                  type="text" 
+                  disabled
+                  style={{ color: 'black', backgroundColor: '#f0f0f0' }}
+                >
+                  Action Completed
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={() => handleDownloadInvoice(record.orderId)}
+                  disabled={record.status !== 1}
+                  icon={<DownloadOutlined />}
+                >
+                  Invoice
+                </Button>
+              </>
+            )}
+          </div>
+        );
       },
+    }
   ];
 
   const fetchOrderItems = async () => {
@@ -126,7 +136,29 @@ const SellerOrders = () => {
       setLoading(false);
     }
   };
-
+  const handleDownloadInvoice = async (orderId: number) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/Order/download-invoice-pdf/${orderId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          responseType: 'blob',
+        }
+      );
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice-${orderId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      message.error('Failed to download invoice');
+    }
+  };
   const handleProcessOrder = async (orderItemId: number, productId: string, approve: boolean = true) => {
     try {
       await axios.post(

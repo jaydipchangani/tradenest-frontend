@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout, Menu, Card, Row, Col, Statistic, Typography, Button } from 'antd';
+import axios from 'axios';
+import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { Area, Column, Pie } from '@ant-design/charts';
 import { 
   Home, 
   Package, 
@@ -17,9 +20,53 @@ import SellerProducts from './SellerProducts';
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
 
+interface DashboardData {
+  totalProducts: number;
+  orders: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
+  totalRevenue: number;
+}
+
 const SellerDashboard = () => {
   const [selectedKey, setSelectedKey] = useState('dashboard');
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const renderOrdersChart = () => {
+    const data = [
+      { type: 'Pending Orders', value: dashboardData?.orders.pending || 0 },
+      { type: 'Approved Orders', value: dashboardData?.orders.approved || 0 },
+      { type: 'Rejected Orders', value: dashboardData?.orders.rejected || 0 },
+    ];
+
+    return (
+      <div style={{ height: 300 }}>
+        <Pie
+          data={data}
+          angleField="value"
+          colorField="type"
+          radius={0.8}
+          label={{
+            type: 'spider',
+            formatter: (datum) => `${datum.type}: ${datum.value}`,
+          }}
+          color={['#fa8c16', '#52c41a', '#ff4d4f']}
+          legend={{
+            position: 'bottom',
+          }}
+          interactions={[
+            {
+              type: 'element-active',
+            },
+          ]}
+        />
+      </div>
+    );
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -34,68 +81,102 @@ const SellerDashboard = () => {
     }
   };
 
+  const fetchDashboardData = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/Dashboard/overview`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      setDashboardData(response.data);
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedKey === 'dashboard') {
+      fetchDashboardData();
+    }
+  }, [selectedKey]);
+  
+
   const renderContent = () => {
     switch (selectedKey) {
       case 'orders':
         return <SellerOrders />;
-        case 'products':
-          return <SellerProducts />;
+      case 'products':
+        return <SellerProducts />;
       default:
         return (
           <>
+            <Title level={3} style={{ marginBottom: 24 }}>Dashboard Overview</Title>
             <Row gutter={[24, 24]}>
               <Col xs={24} sm={12} lg={8}>
-                <Card>
+                <Card hoverable>
                   <Statistic
-                    title="Total Products"
-                    value={12}
-                    valueStyle={{ color: '#1890ff' }}
-                    prefix={<Package size={20} />}
+                    title={<span style={{ fontSize: '16px', fontWeight: 'bold' }}>Total Products</span>}
+                    value={dashboardData?.totalProducts || 0}
+                    valueStyle={{ color: '#1890ff', fontSize: '24px' }}
+                    prefix={<Package size={24} />}
                   />
                 </Card>
               </Col>
               <Col xs={24} sm={12} lg={8}>
-                <Card>
+                <Card hoverable>
                   <Statistic
-                    title="Pending Orders"
-                    value={5}
-                    valueStyle={{ color: '#fa8c16' }}
-                    prefix={<ShoppingBag size={20} />}
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} lg={8}>
-                <Card>
-                  <Statistic
-                    title="Total Revenue"
-                    value={2450}
-                    valueStyle={{ color: '#52c41a' }}
-                    prefix={<DollarSign size={20} />}
-                    suffix="₹"
+                    title={<span style={{ fontSize: '16px', fontWeight: 'bold' }}>Total Revenue</span>}
+                    value={dashboardData?.totalRevenue || 0}
+                    valueStyle={{ color: '#52c41a', fontSize: '24px' }}
+                    prefix="₹"
+                    precision={2}
                   />
                 </Card>
               </Col>
             </Row>
 
-            <Row gutter={[24, 24]} className="mt-6">
-              <Col xs={24} lg={16}>
-                <Card title="Recent Orders" className="recent-orders-card">
-                  <p>Your recent orders will appear here...</p>
+            <Row gutter={[24, 24]} style={{ marginTop: '24px' }}>
+              <Col xs={24} sm={12} lg={8}>
+                <Card hoverable>
+                  <Statistic
+                    title={<span style={{ fontSize: '16px', fontWeight: 'bold' }}>Pending Orders</span>}
+                    value={dashboardData?.orders.pending || 0}
+                    valueStyle={{ color: '#fa8c16', fontSize: '24px' }}
+                    prefix={<ShoppingBag size={24} />}
+                  />
                 </Card>
               </Col>
-              <Col xs={24} lg={8}>
-                <Card title="Quick Actions" className="quick-actions-card">
-                  <div className="quick-actions">
-                    <Button type="primary" block className="mb-3">
-                      Add New Product
-                    </Button>
-                    <Button type="default" block className="mb-3">
-                      View Pending Orders
-                    </Button>
-                    <Button type="default" block>
-                      Update Shop Profile
-                    </Button>
-                  </div>
+              <Col xs={24} sm={12} lg={8}>
+                <Card hoverable>
+                  <Statistic
+                    title={<span style={{ fontSize: '16px', fontWeight: 'bold' }}>Approved Orders</span>}
+                    value={dashboardData?.orders.approved || 0}
+                    valueStyle={{ color: '#52c41a', fontSize: '24px' }}
+                    prefix={<CheckCircleOutlined style={{ fontSize: '24px' }} />}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={12} lg={8}>
+                <Card hoverable>
+                  <Statistic
+                    title={<span style={{ fontSize: '16px', fontWeight: 'bold' }}>Rejected Orders</span>}
+                    value={dashboardData?.orders.rejected || 0}
+                    valueStyle={{ color: '#ff4d4f', fontSize: '24px' }}
+                    prefix={<CloseCircleOutlined style={{ fontSize: '24px' }} />}
+                  />
+                </Card>
+              </Col>
+            </Row>
+
+            <Row gutter={[24, 24]} style={{ marginTop: '24px' }}>
+              <Col xs={24}>
+                <Card title={<span style={{ fontSize: '16px', fontWeight: 'bold' }}>Orders Overview</span>}>
+                  {renderOrdersChart()}
                 </Card>
               </Col>
             </Row>
