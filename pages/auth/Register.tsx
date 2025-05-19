@@ -50,19 +50,23 @@ const RegisterPage: React.FC = () => {
         categoryIds: selectedRole === 1 ? values.categoryIds : [],
       };
   
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/Auth/register`,
         payload,
         { headers: { 'Content-Type': 'application/json' } }
       );
   
       setRegistrationSuccess(true);
-      antMessage.success('Registration successful! After Admin Approval you can login yourself.');
       
-      // Redirect to login page after 5 seconds
-      setTimeout(() => {
+      if (selectedRole === 1) {
+        antMessage.success('Registration successful! After Admin Approval you can login yourself.');
+        setTimeout(() => {
+          navigate('/auth/login');
+        }, 5000);
+      } else {
+        antMessage.success('Registration successful! You can login now.');
         navigate('/auth/login');
-      }, 5000);
+      }
     } catch (error: any) {
       console.error('Registration error:', error);
       const apiMessage =
@@ -90,12 +94,10 @@ const RegisterPage: React.FC = () => {
         </div>
         <span>Easy account setup</span>
       </div>
-      {/* Other feature items remain unchanged */}
     </div>
   </div>
 </div>
       
-      {/* Right side - Registration form */}
       <div className="register-form-section">
         <div className="register-form-wrapper">
           <div className="register-header">
@@ -104,14 +106,14 @@ const RegisterPage: React.FC = () => {
           </div>
           
           <div className="register-form-container">
-            {registrationSuccess ? (
-              <div className="registration-success">
-                <div className="success-icon">✓</div>
-                <Title level={4}>Registration Successful!</Title>
-                <Text>After Admin Approval you can login yourself.</Text>
-                <Text>Redirecting to login page in 5 seconds...</Text>
-                <Spin />
-              </div>
+          {registrationSuccess && selectedRole === 1 ? (
+    <div className="registration-success">
+      <div className="success-icon">✓</div>
+      <Title level={4}>Registration Successful!</Title>
+      <Text>After Admin Approval you can login yourself.</Text>
+      <Text>Redirecting to login page in 5 seconds...</Text>
+      <Spin />
+    </div>
             ) : (
               <Form
                 form={form}
