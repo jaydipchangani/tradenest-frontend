@@ -15,7 +15,7 @@ interface Product {
       city: string;
     };
   }
-  const BASE_IMAGE_URL = 'C:/TradeNest/TradeNestSolution/TradeNestSolution/wwwroot';
+  const BASE_IMAGE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,14 +26,10 @@ const Products = () => {
         key: 'image',
         render: (_, record: Product) => (
           <img 
-            src={`${BASE_IMAGE_URL}${record.imageUrl}`}
-            alt={record.name}
-            style={{ 
-              width: '50px', 
-              height: '50px', 
-              objectFit: 'cover',
-              borderRadius: '4px'
-            }}
+          alt={record.name}
+          src={`${BASE_IMAGE_URL}${record.imageUrl}`}
+          style={{ height: 50}}
+            
           />
         ),
       },
