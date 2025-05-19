@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Card, Row, Col, Typography, Input, Select, Button, Tag, Pagination, message, Descriptions } from 'antd';
-import { ShoppingCartOutlined, HeartOutlined, FilterOutlined } from '@ant-design/icons';
+import { Layout, Card, Row, Col, Typography, Input, Select, Button, Tag, Pagination, message, Descriptions,Space } from 'antd';
+import { ShoppingCartOutlined, HeartOutlined, FilterOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useDebounce } from 'use-debounce';
 
@@ -12,6 +12,19 @@ const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
+interface Category {
+  id: number;
+  name: string;
+}
+const CATEGORIES: Category[] = [
+  { id: 1, name: 'Electronics' },
+  { id: 2, name: 'Fashion' },
+  { id: 3, name: 'Home & Kitchen' },
+  { id: 4, name: 'Books' },
+  { id: 5, name: 'Beauty & Health' },
+  { id: 6, name: 'Sports & Outdoors' },
+  { id: 7, name: 'Toys & Games' },
+];
 interface Product {
     id: string;
     name: string;
@@ -44,7 +57,7 @@ const Products: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const BASE_IMAGE_URL = import.meta.env.VITE_API_BASE_URL || '';
   const [quantities, setQuantities] = useState<{ [productId: string]: number }>({});
-
+  const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
 
   const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
 
@@ -58,7 +71,8 @@ const Products: React.FC = () => {
             pageSize: pageSize,
             sortBy: sortBy,
             isDescending: isDescending,
-            searchQuery: debouncedSearchQuery || undefined
+            searchQuery: debouncedSearchQuery || undefined,
+            categoryId: selectedCategory // Add this line
           },
           headers: {
             'Accept': 'application/json'
@@ -85,7 +99,7 @@ const Products: React.FC = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [currentPage, pageSize, sortBy, isDescending, debouncedSearchQuery]);
+  }, [currentPage, pageSize, sortBy, isDescending, debouncedSearchQuery, selectedCategory]);
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
@@ -160,7 +174,7 @@ const Products: React.FC = () => {
 
 
   return (
-    <Content style={{ padding: '24px', maxWidth: 1400, margin: '0 auto', width: '100%' }}>
+    <Content style={{ padding: '16px', maxWidth: '100%', margin: '0 auto', width: '100%' }}>
       <div className="products-header" style={{ marginBottom: 24 }}>
         <Row gutter={[16, 16]} align="middle" justify="space-between">
           <Col>
@@ -180,26 +194,47 @@ const Products: React.FC = () => {
       </div>
 
       <Row gutter={[16, 16]}>
-        <Col xs={24} md={18}>
-          <Card style={{ marginBottom: 16 }} loading={loading}>
-            <Row justify="space-between" align="middle">
-              <Col>
-                <Text>Showing {products.length} of {totalRecords} products</Text>
-              </Col>
-              <Col>
-                <Select 
-                  defaultValue="name-asc" 
-                  style={{ width: 200 }}
-                  onChange={handleSortChange}
-                >
-                  <Option value="name-asc">Name (A-Z)</Option>
-                  <Option value="name-desc">Name (Z-A)</Option>
-                  <Option value="price-low">Price: Low to High</Option>
-                  <Option value="price-high">Price: High to Low</Option>
-                </Select>
-              </Col>
-            </Row>
-          </Card>
+  <Col xs={24}>
+  <Card style={{ marginBottom: 16 }} loading={loading}>
+  <Row justify="space-between" align="middle">
+    <Col>
+      <Text>Showing {products.length} of {totalRecords} products</Text>
+    </Col>
+    <Col>
+      <Space size="middle">
+      <Select
+  placeholder="Select Category"
+  style={{ width: 200 }}
+  onChange={(value: number | undefined) => {
+    setSelectedCategory(value);
+    setCurrentPage(1);
+  }}
+  allowClear
+  clearIcon={<CloseCircleOutlined />}
+  defaultValue={undefined}
+  value={selectedCategory}
+>
+  <Option value={undefined}>All Categories</Option>
+  {CATEGORIES.map(category => (
+    <Option key={category.id} value={category.id}>
+      {category.name}
+    </Option>
+  ))}
+</Select>
+        <Select 
+          defaultValue="name-asc" 
+          style={{ width: 200 }}
+          onChange={handleSortChange}
+        >
+          <Option value="name-asc">Name (A-Z)</Option>
+          <Option value="name-desc">Name (Z-A)</Option>
+          <Option value="price-low">Price: Low to High</Option>
+          <Option value="price-high">Price: High to Low</Option>
+        </Select>
+      </Space>
+    </Col>
+  </Row>
+</Card>
 
           <Row gutter={[16, 16]}>
           {products.filter(product => product.isActive).map(product => (
@@ -270,15 +305,7 @@ const Products: React.FC = () => {
                     description={
                       <>
                         <Text type="secondary">{product.description}</Text>
-                        <div style={{ marginTop: 8 }}>
-                          {!product.isActive ? (
-                            <Tag color="error">Unavailable</Tag>
-                          ) : product.inventory > 0 ? (
-                            <Tag color="success">In Stock ({product.inventory})</Tag>
-                          ) : (
-                            <Tag color="error">Out of Stock</Tag>
-                          )}
-                        </div>
+                        
                       </>
                     }
                   />
