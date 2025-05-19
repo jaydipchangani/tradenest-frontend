@@ -8,12 +8,20 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 
 interface CartItem {
-    id: number;
-    productId: string;
-    productName: string;
-    productPrice: number;
-    quantity: number;
-  }
+  id: number;
+  productId: string;
+  productName: string;
+  productPrice: number;
+  quantity: number;
+  product: {
+    imageUrl: string;
+    description: string;
+    seller: {
+      shopName: string;
+      city: string;
+    };
+  };
+}
 
 const Cart: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -32,20 +40,15 @@ const Cart: React.FC = () => {
         },
       });
   
-      // Handle the nested response structure
-      const items = response.data.$values.map((item: any) => ({
+      // Handle the new response structure
+      const items = response.data.items.$values.map((item: any) => ({
         id: item.id,
         productId: item.productId,
         productName: item.productName,
         productPrice: item.productPrice,
-        quantity: item.quantity,
+        quantity: item.quantity
       }));
   
-      const itemMap: { [key: string]: any } = {};
-    response.data.$values.forEach((item: any) => {
-      itemMap[item.$id] = item;
-    });
-    
       setCartItems(items);
     } catch (error) {
       console.error('Error fetching cart items:', error);
@@ -54,7 +57,7 @@ const Cart: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   const updateQuantity = async (itemId: number, newQuantity: number) => {
     try {
       const token = localStorage.getItem('token');
@@ -137,16 +140,16 @@ const Cart: React.FC = () => {
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description="Your cart is empty"
           >
-           <Button
-  type="primary"
-  icon={<ShoppingOutlined />}
-  onClick={() => {
-    window.location.href = document.referrer || '/'; // Navigate back
-    window.location.reload(); // Force refresh
-  }}
->
-  Continue Shopping
-</Button>
+            <Button
+              type="primary"
+              icon={<ShoppingOutlined />}
+              onClick={() => {
+                window.location.href = document.referrer || '/'; // Navigate back
+                window.location.reload(); // Force refresh
+              }}
+            >
+              Continue Shopping
+            </Button>
 
           </Empty>
         </Card>
@@ -158,41 +161,52 @@ const Cart: React.FC = () => {
                 itemLayout="horizontal"
                 dataSource={cartItems}
                 renderItem={item => (
-                    <List.Item
-                    actions={[
-                      <Button 
-                        type="text" 
-                        danger 
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleRemoveItem(item.id)}
+                  <List.Item
+                  actions={[
+                    <Button
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleRemoveItem(item.id)}
+                    />
+                  ]}
+                >
+                  <div style={{ display: 'flex', width: '100%', gap: '16px' }}>
+                    <div style={{ flex: 1 }}>
+                      <List.Item.Meta
+                        title={item.productName}
+                        description={
+                          <div>
+                            <Text type="secondary">Product ID: {item.productId}</Text>
+                          </div>
+                        }
                       />
-                    ]}
-                  >
-                    <List.Item.Meta
-  title={item.productName}
-  description={`$${item.productPrice ? item.productPrice.toFixed(2) : '0.00'}`}
-/>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Button
-                        icon={<MinusOutlined />}
-                        onClick={() => item.quantity > 1 && updateQuantity(item.id, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
-                      />
-                      <InputNumber
-                        min={1}
-                        value={item.quantity}
-                        onChange={(value) => value && updateQuantity(item.id, value)}
-                        style={{ width: 60 }}
-                      />
-                      <Button
-                        icon={<PlusOutlined />}
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                        <Button
+                          icon={<MinusOutlined />}
+                          onClick={() => item.quantity > 1 && updateQuantity(item.id, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                        />
+                        <InputNumber
+                          min={1}
+                          value={item.quantity}
+                          onChange={(value) => value && updateQuantity(item.id, value)}
+                          style={{ width: 60 }}
+                        />
+                        <Button
+                          icon={<PlusOutlined />}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        />
+                        <div style={{ marginLeft: '16px', minWidth: '100px', textAlign: 'right' }}>
+                          <Text strong>₹{((item.productPrice || 0) * item.quantity).toFixed(2)}</Text>
+                          <div>
+                            <Text type="secondary">₹{(item.productPrice || 0).toFixed(2)} each</Text>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ marginLeft: '16px', minWidth: '80px', textAlign: 'right' }}>
-  <Text strong>${item.productPrice ? (item.productPrice * item.quantity).toFixed(2) : '0.00'}</Text>
-</div>
-                  </List.Item>
+                  </div>
+                </List.Item>
                 )}
               />
             </Card>
@@ -206,14 +220,14 @@ const Cart: React.FC = () => {
                 <Text>Subtotal ({cartItems.length} items)</Text>
                 <Text strong>${calculateTotal().toFixed(2)}</Text>
               </div>
-              <Button 
-  type="primary" 
-  block 
-  size="large"
-  onClick={handlePlaceOrder}
->
-  Proceed to Checkout
-</Button>
+              <Button
+                type="primary"
+                block
+                size="large"
+                onClick={handlePlaceOrder}
+              >
+                Proceed to Checkout
+              </Button>
             </Card>
           </Col>
         </Row>

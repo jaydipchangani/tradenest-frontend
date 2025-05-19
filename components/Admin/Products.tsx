@@ -10,6 +10,10 @@ interface Product {
     inventory: number;
     imageUrl: string;
     isActive: boolean;
+    seller: {
+      shopName: string;
+      city: string;
+    };
   }
   const BASE_IMAGE_URL = 'C:/TradeNest/TradeNestSolution/TradeNestSolution/wwwroot';
 const Products = () => {
@@ -39,10 +43,14 @@ const Products = () => {
       key: 'name',
     },
     {
-      title: 'Description',
-      dataIndex: 'description',
-      key: 'description',
-      ellipsis: true,
+      title: 'Shop Name',
+      key: 'shopName',
+      render: (_, record: Product) => record.seller?.shopName || 'N/A',
+    },
+    {
+      title: 'Seller City',
+      key: 'city',
+      render: (_, record: Product) => record.seller?.city || 'N/A',
     },
     {
       title: 'Price',

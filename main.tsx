@@ -6,9 +6,9 @@ import 'antd/dist/reset.css'; // Import Antd CSS reset
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </React.StrictMode>,
+
 );
