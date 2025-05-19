@@ -77,6 +77,46 @@ const Orders: React.FC = () => {
     fetchOrders();
   }, []);
 
+  // Add this function after the fetchOrders function
+const handleDownloadInvoice = async (orderId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/Order/download-invoice-pdf/${orderId}`, 
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          responseType: 'blob', // Important for handling PDF files
+        }
+      );
+      
+      // Create a blob from the PDF response
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      
+      // Create a URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice-${orderId}.pdf`);
+      
+      // Append to the document, click it, and then remove it
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL object
+      window.URL.revokeObjectURL(url);
+      
+      message.success('Invoice downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      message.error('Failed to download invoice');
+    }
+  };
+
   const getStatusText = (status: number) => {
     switch (status) {
       case 0:
@@ -153,26 +193,35 @@ const Orders: React.FC = () => {
       ),
     },
     {
-      title: 'Actions',
-      key: 'actions',
-      render: (_, record: any) => {
-        const order = orders.find(o => o.orderId === record.orderId);
-        return (
-          <Button 
-            type="primary" 
-            icon={<FileTextOutlined />} 
-            onClick={() => {
-              if (order) {
-                setSelectedOrder(order);
-                setDetailsVisible(true);
-              }
-            }}
-          >
-            View Order
-          </Button>
-        );
+        title: 'Actions',
+        key: 'actions',
+        render: (_, record: any) => {
+          const order = orders.find(o => o.orderId === record.orderId);
+          return (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Button 
+                type="primary" 
+                icon={<FileTextOutlined />} 
+                onClick={() => {
+                  if (order) {
+                    setSelectedOrder(order);
+                    setDetailsVisible(true);
+                  }
+                }}
+              >
+                View Order
+              </Button>
+              <Button
+                type="default"
+                onClick={() => handleDownloadInvoice(record.orderId)}
+                disabled={record.status !== 1} // Only enable for Accepted items (status code 1)
+              >
+                Download Invoice
+              </Button>
+            </div>
+          );
+        },
       },
-    },
   ];
 
   const itemColumns = [
