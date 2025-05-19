@@ -11,7 +11,8 @@ import {
     ShoppingOutlined,
     TagOutlined,
     StarOutlined,
-    LogoutOutlined
+    LogoutOutlined,
+    OrderedListOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Products from './Products';
@@ -223,7 +224,13 @@ const CustomerDashboard: React.FC = () => {
                     mode="horizontal"
                     onClick={handleNavClick}
                     defaultSelectedKeys={['home']}
-                    style={{ display: 'flex', justifyContent: 'space-around', borderBottom: 'none' }}
+                    style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-around', 
+                        borderBottom: 'none',
+                        width: '100%',
+                        maxWidth: '600px'
+                    }}
                 >
                     <Menu.Item key="home" icon={<HomeOutlined />}>
                         Home
@@ -234,10 +241,10 @@ const CustomerDashboard: React.FC = () => {
                     <Menu.Item key="cart" icon={<ShoppingCartOutlined />}>
                         Cart
                     </Menu.Item>
-                    <Menu.Item key="orders" icon={<ShoppingCartOutlined />}>
+                    <Menu.Item key="orders" icon={<OrderedListOutlined />}>
                         Orders
                     </Menu.Item>
-
+                    
                 </Menu>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
 

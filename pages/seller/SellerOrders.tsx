@@ -76,8 +76,9 @@ const SellerOrders = () => {
           if (record.status !== 0) {
             return (
               <Button 
-                type="primary" 
+                type="text" 
                 disabled
+                style={{ color: 'black', backgroundColor: '#f0f0f0' }}
               >
                 Action Completed
               </Button>
@@ -111,7 +112,7 @@ const SellerOrders = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/Order/my-order-items`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/Order/seller-order-items`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
