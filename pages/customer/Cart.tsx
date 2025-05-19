@@ -107,6 +107,42 @@ const Cart: React.FC = () => {
     }
   };
 
+  const increaseQuantity = async (productId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/Order/increase-item/${productId}`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+      fetchCartItems();
+    } catch (error) {
+      message.error('Failed to increase quantity');
+    }
+  };
+  
+  const decreaseQuantity = async (productId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/Order/decrease-item/${productId}`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+      fetchCartItems();
+    } catch (error) {
+      message.error('Failed to decrease quantity');
+    }
+  };
+  
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => total + (item.productPrice * item.quantity), 0);
   };
@@ -186,21 +222,21 @@ const Cart: React.FC = () => {
                         
                       />
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
-                        <Button
-                          icon={<MinusOutlined />}
-                          onClick={() => item.quantity > 1 && updateQuantity(item.id, item.quantity - 1)}
-                          disabled={item.quantity <= 1}
-                        />
-                        <InputNumber
-                          min={1}
-                          value={item.quantity}
-                          onChange={(value) => value && updateQuantity(item.id, value)}
-                          style={{ width: 60 }}
-                        />
-                        <Button
-                          icon={<PlusOutlined />}
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        />
+                      <Button
+  icon={<MinusOutlined />}
+  onClick={() => item.quantity > 1 && decreaseQuantity(item.productId)}
+  disabled={item.quantity <= 1}
+/>
+<InputNumber
+  min={1}
+  value={item.quantity}
+  disabled
+  style={{ width: 60 }}
+/>
+<Button
+  icon={<PlusOutlined />}
+  onClick={() => increaseQuantity(item.productId)}
+/>
                         <div style={{ marginLeft: '16px', minWidth: '100px', textAlign: 'right' }}>
                           <Text strong>₹{((item.productPrice || 0) * item.quantity).toFixed(2)}</Text>
                           <div>
