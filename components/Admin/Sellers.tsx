@@ -8,7 +8,9 @@ interface Seller {
   shopName: string;
   city: string;
   status: number;
-  isActive: boolean;
+  user: {
+    isActive: boolean;
+  };
 }
 
 const Sellers = () => {
@@ -36,7 +38,7 @@ const Sellers = () => {
       key: 'activeStatus',
       render: (_, record: Seller) => (
         <Switch
-          checked={record.isActive}
+          checked={record.user.isActive}
           onChange={(checked) => handleToggleStatus(record.userId, checked)}
           disabled={record.status === 0}
         />
