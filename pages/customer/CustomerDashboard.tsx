@@ -17,6 +17,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Products from './Products';
 import Cart from './Cart';
+import Orders from './Orders';
 import axios from 'axios';
 
 const { Header, Content, Footer } = Layout;
@@ -114,6 +115,8 @@ const CustomerDashboard: React.FC = () => {
                 return <Products />;
             case 'cart':
                 return <Cart/>;
+            case 'orders':
+            return <Orders />;
             default:
                 return (
                     <>
